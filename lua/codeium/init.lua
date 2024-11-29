@@ -8,10 +8,13 @@ function M.setup(options)
 
   M.s = Server.new()
   update.download(function(err)
-    if not err then
-      Server.load_api_key()
-      M.s:start()
+    if err then
+      vim.api.nvim_err_writeln("Codeium: Failed to download updates: " .. err)
+      return
     end
+
+    Server.load_api_key()
+    M.s:start()
   end)
   health.register(M.s)
 
