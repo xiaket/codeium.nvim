@@ -403,7 +403,7 @@ function Server:request_completion(document, editor_options, other_documents, ca
     other_documents = other_documents,
   }, function(body, err)
     if err then
-      if err.status == 503 or err.status == 408 then
+      if err.status == 503 or err.status == 504 or err.status == 408 then
         -- Service Unavailable or Timeout error
         return complete(false, nil)
       end
