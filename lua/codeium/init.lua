@@ -1,20 +1,19 @@
 local M = {}
 
 function M.setup(options)
-  local Source = require("codeium.source")
   local Server = require("codeium.api")
   local update = require("codeium.update")
   local health = require("codeium.health")
   require("codeium.config").setup(options)
 
-  local s = Server:new()
+  M.s = Server.new()
   update.download(function(err)
     if not err then
       Server.load_api_key()
-      s.start()
+      M.s:start()
     end
   end)
-  health.register(s.checkhealth)
+  health.register(M.s)
 
   vim.api.nvim_create_user_command("Codeium", function(opts)
     local args = opts.fargs
@@ -25,19 +24,11 @@ function M.setup(options)
     nargs = 1,
     complete = function()
       local commands = { "Auth" }
-      if require("codeium.config").options.enable_chat then
-        commands = vim.list_extend(commands, { "Chat" })
-      end
       return commands
     end,
   })
 
-  local source = Source:new(s)
-  if require("codeium.config").options.enable_cmp_source then
-    require("cmp").register_source("codeium", source)
-  end
-
-  require("codeium.virtual_text").setup(s)
+  require("codeium.virtual_text").setup(M.s)
 end
 
 return M
