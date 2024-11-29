@@ -57,7 +57,6 @@ end
 --- @field healthy boolean
 --- @field last_heartbeat? number
 --- @field last_heartbeat_error? string
---- @field enabled boolean
 --- @field pending_request table
 local Server = {
   port = nil,
@@ -67,7 +66,6 @@ local Server = {
   healthy = false,
   last_heartbeat = nil,
   last_heartbeat_error = nil,
-  enabled = true,
   pending_request = { 0, noop },
 }
 
@@ -360,7 +358,7 @@ function Server:do_heartbeat()
 end
 
 function Server:request_completion(document, editor_options, other_documents, callback)
-  if not self.enabled or not self.port then
+  if not self.port then
     return
   end
   self.pending_request[2](true)
@@ -553,24 +551,6 @@ function Server:shutdown()
   if self.job then
     self.job.on_exit = nil
     self.job:shutdown()
-  end
-end
-
-function Server:enable()
-  self.enabled = true
-  notify.info("Codeium enabled")
-end
-
-function Server:disable()
-  self.enabled = false
-  notify.info("Codeium disabled")
-end
-
-function Server:toggle()
-  if self.enabled then
-    self:disable()
-  else
-    self:enable()
   end
 end
 

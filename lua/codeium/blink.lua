@@ -90,9 +90,6 @@ function M:get_trigger_characters()
   return { '"', "`", "[", "]", ".", " ", "\n" }
 end
 --
-function M:enabled()
-  return self.server.enabled
-end
 
 function M:get_completions(ctx, callback)
   local context = ctx
