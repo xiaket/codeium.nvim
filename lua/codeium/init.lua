@@ -30,8 +30,6 @@ function M.setup(options)
       return commands
     end,
   })
-
-  require("codeium.virtual_text").setup(M.s)
 end
 
 return M
