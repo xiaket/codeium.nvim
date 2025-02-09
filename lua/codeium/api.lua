@@ -261,11 +261,6 @@ function Server:start()
     on_stderr = on_output,
   }
 
-  if config.options.enable_chat then
-    table.insert(job_args, "--enable_chat_web_server")
-    table.insert(job_args, "--enable_chat_client")
-  end
-
   if config.options.enable_local_search then
     table.insert(job_args, "--enable_local_search")
   end
@@ -500,49 +495,6 @@ function Server:add_workspace()
       return
     end
     self.workspaces[project_root] = true
-  end)
-end
-
-function Server:get_chat_ports()
-  self:request("GetProcesses", {
-    metadata = get_request_metadata(),
-  }, function(body, err)
-    if err then
-      notify.error("failed to get chat ports", err)
-      return
-    end
-    local ports = vim.fn.json_decode(body)
-    local url = "http://127.0.0.1:"
-      .. ports.chatClientPort
-      .. "?api_key="
-      .. api_key
-      .. "&has_enterprise_extension="
-      .. (config.options.enterprise_mode and "true" or "false")
-      .. "&web_server_url=ws://127.0.0.1:"
-      .. ports.chatWebServerPort
-      .. "&ide_name=neovim"
-      .. "&ide_version="
-      .. versions.nvim
-      .. "&app_name=codeium.nvim"
-      .. "&extension_name=codeium.nvim"
-      .. "&extension_version="
-      .. versions.extension
-      .. "&ide_telemetry_enabled=true"
-      .. "&has_index_service="
-      .. (config.options.enable_index_service and "true" or "false")
-      .. "&locale=en_US"
-
-    -- cross-platform solution to open the web app
-    local os_info = io.get_system_info()
-    if os_info.os == "linux" then
-      os.execute("xdg-open '" .. url .. "'")
-    elseif os_info.os == "macos" then
-      os.execute("open '" .. url .. "'")
-    elseif os_info.os == "windows" then
-      os.execute(string.format('start "" "%s"', url))
-    else
-      notify.error("Unsupported operating system")
-    end
   end)
 end
 
