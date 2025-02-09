@@ -15,16 +15,16 @@ Deviation from upstream:
 ```lua
 {
 	'saghen/blink.cmp',
-    dependencies = {
+	dependencies = {
 		{
 			"xiaket/codeium.nvim",
-            dependencies = {
+			dependencies = {
 				"nvim-lua/plenary.nvim",
-		    },
-		    opts = {},
+			},
+			opts = {},
 		},
-    },
-    opts = {
+	},
+	opts = {
 		sources = {
 			completion = {
 				enabled_providers = { 'lsp', 'path', 'snippets', 'buffer', 'codeium' },
