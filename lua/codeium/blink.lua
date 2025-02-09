@@ -11,12 +11,13 @@ end
 local function codeium_to_item(comp, offset, right)
   local documentation = comp.completion.text
 
-  local label = documentation:sub(offset)
-  if label:sub(-#right) == right then
-    label = label:sub(1, -#right - 1)
-  end
+  -- If the remaining text after cursor is short (<=5 chars), ignore it completely
+  -- This helps avoid duplicated text in simple cases like closing brackets
+  local should_trim_right = #right <= 5
 
-  -- We get the completion part that has the largest offset
+  local label = documentation:sub(offset)
+
+  -- Find the completion part that has the largest offset
   local max_offset = offset
   if comp.completionParts then
     for _, v in pairs(comp.completionParts) do
@@ -27,26 +28,32 @@ local function codeium_to_item(comp, offset, right)
     end
   end
 
-  -- We get where the suffix difference between the completion and the range of code
+  -- Calculate the difference between completion and code range endings
   local suffix_diff = comp.range.endOffset - max_offset
+
+  -- Adjust the range end position based on should_trim_right
+  local end_character
+  if should_trim_right then
+    -- If we're trimming right, extend the range to include the remaining text
+    end_character = (comp.range.endPosition.col or suffix_diff) - suffix_diff + #right
+  else
+    end_character = (comp.range.endPosition.col or suffix_diff) - suffix_diff
+  end
 
   local range = {
     start = {
-      -- Codeium returns an empty row for the first line
       line = (tonumber(comp.range.startPosition.row) or 0),
       character = offset - 1,
     },
     ["end"] = {
-      -- Codeium returns an empty row for the first line
       line = (tonumber(comp.range.endPosition.row) or 0),
-      -- We only want to replace up to where the completion ends
-      character = (comp.range.endPosition.col or suffix_diff) - suffix_diff,
+      character = end_character,
     },
   }
 
   local display_label = string.match(label, "([^\n]*)")
   if display_label ~= label then
-    display_label = display_label .. "  "
+    display_label = display_label .. "  "
   end
 
   return {
